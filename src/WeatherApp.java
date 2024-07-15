@@ -1,3 +1,5 @@
+//Made by Adrian Lambert 15/07/2024
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -13,12 +15,12 @@ public class WeatherApp {
     public static JSONObject getWeather(String LocationName) {
         JSONArray locationData = getLocationData(LocationName);
 
-
+        //Grab Lat/Long location for input
         JSONObject location = (JSONObject) locationData.get(0);
-        double latitude = (double) location.get("Latitude");
-        double longitute = (double) location.get("Longitute");
+        double latitude = (double) location.get("latitude");
+        double longitude = (double) location.get("longitude");
 
-        String urlString = "https://api.open-meteo.com/v1/forecast?latitude="+ latitude + "&longitude=" + longitute +"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
+        String urlString = "https://api.open-meteo.com/v1/forecast?latitude="+ latitude + "&longitude=" + longitude +"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
         
         try {
             //Call weather API
@@ -53,20 +55,20 @@ public class WeatherApp {
             JSONArray temperatureArray = (JSONArray) hourly.get("temperature_2m");
             double temperature = (double) temperatureArray.get(index);
 
-            JSONArray humidityArray = (JSONArray) hourly.get("relativehumidity_2m");
+            JSONArray humidityArray = (JSONArray) hourly.get("relative_humidity_2m");
             long humidity = (long) humidityArray.get(index);
 
-            JSONArray windspeedArray = (JSONArray) hourly.get("windspeed_10m");
+            JSONArray windspeedArray = (JSONArray) hourly.get("wind_speed_10m");
             double windspeed = (double) windspeedArray.get(index);
 
-            JSONArray weatherCode = (JSONArray) hourly.get("weathercode");
-            String weatherCondition = convertWeatherCode((int) weatherCode.get(index));
+            JSONArray weatherCode = (JSONArray) hourly.get("weather_code");
+            String weatherCondition = convertWeatherCode((long) weatherCode.get(index));
 
 
             //Create JSON object to interact with the frontend
             JSONObject weather = new JSONObject();
             weather.put("temperature", temperature);
-            weather.put("weather condition", weatherCondition);
+            weather.put("weather_condition", weatherCondition);
             weather.put("humidity", humidity);
             weather.put("windspeed", windspeed);
 
@@ -158,16 +160,16 @@ public class WeatherApp {
     }
 
 
-    private static String convertWeatherCode(int weatherCode) {
+    private static String convertWeatherCode(long weatherCode) {
         String weatherCondition = "";
 
-        if (weatherCode == 0) {
+        if (weatherCode == 0L) {
             weatherCondition = "Clear";
-        } else if (weatherCode <= 3) {
+        } else if (weatherCode <= 3L) {
             weatherCondition = "Cloudy";
-        } else if (weatherCode >= 51 && weatherCode <= 67) {
+        } else if ((weatherCode >= 51L && weatherCode <= 67L) || weatherCode >= 80L && weatherCode <= 99L) {
             weatherCondition = "Rain";
-        } else if (weatherCode >= 71 && weatherCode <= 77) {
+        } else if (weatherCode >= 71L && weatherCode <= 77L) {
             weatherCondition = "Snow";
         }
 
